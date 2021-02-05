@@ -1,0 +1,32 @@
+---
+title: "Leaflet and Xaringan"
+author: "Adithi R. Upadhya, ILK Labs"
+date: "2/2/2021"
+output:
+  xaringan::moon_reader:
+    css: [default, hygge, hygge-duke]
+---
+
+```{r message = FALSE, warning = FALSE, echo = FALSE, include = FALSE}
+library(leaflet)
+library(sp)
+library(sf)
+library(rgdal)
+Layer <- readOGR("data/Corrected_Median_Means_Final_CNG_Layer.shp", layer = "Corrected_Median_Means_Final_CNG_Layer")
+Layer <- spTransform(Layer, CRS("+init=epsg:4326"))
+```
+
+
+```{r message = FALSE, warning = FALSE, echo = FALSE}
+ risk.bins <- c(0, 0.5, 2, 5, 10, 20, 40, 100, 500, 1000)
+      pal <- colorBin( "Spectral", bins = risk.bins, na.color = "#808080",
+                       reverse = TRUE)
+leaflet(Layer, width = "100%") %>%
+      addProviderTiles(providers$Stamen.TonerLite) %>%
+      addPolylines(col = ~ pal(Layer[["Med_BC"]]), popup =  paste("AE51_BC (ug/m3):", round(as.numeric(Layer$Med_BC), digits = 2), "<br>", "RH(%):",
+                                round(as.numeric(Layer$Med_RH), digits = 2), "<br>", "CPC3007_Particle Concentration (#/cm3):", round(as.numeric(Layer$Med_CPC), digits = 2))) %>%
+      leaflet::addLegend("bottomright", pal = pal,
+                         values = ~Layer[["Med_BC"]],
+                         title = paste("Black Carbon"))
+```
+
